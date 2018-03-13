@@ -1,6 +1,7 @@
 
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import groovy.json.JsonSlurperClassic
 import groovy.json.JsonParserType
 
 def String cleanupUnquotedJson(String text)
@@ -299,50 +300,108 @@ def Object parseLaxJson(String text)
 	return new JsonSlurper().setType(JsonParserType.LAX).parseText(text)
 }
 
-def test333(String rawJson)
+class say {
+	static debug (verbose, text) { if (verbose) println text; println() }
+	static debug (text) { println text; println() }
+	static fatal (text) { throw new Exception(text) }
+}
+
+def Object slurpLaxJson(Map args = [:], String jsonText)
 {
-	println("rawJson=\n${rawJson}")
-	println()
+	String  MSG_PFX = 'slurpLaxJson: '
+	Boolean debug       = true // hard-code switch
+	Boolean verbose     = args.verbose    ?: false
+	say.debug (debug, "${MSG_PFX}Entry: args=${args}; jsonText=${jsonText};")
+	
+	Boolean lineAsList  = args.lineAsList ?: false
+	Boolean lineAsMap   = args.lineAsMap  ?: false
+	
+	Boolean asArray     = args.asArray    ?: (lineAsList || lineAsMap)
+	
+	if (lineAsList && lineAsMap)
+	{
+		say.fatal ("${MSG_PFX}May not use both 'lineAsList' and 'lineAsMap' flags")
+	}
 	
 	// splice lines
 	// wipe line-comments and blanks
 
-	def rmHashAnchored = rawJson	
+	def splicedAndDeblanked = jsonText.trim()	
 		.replaceAll(/\\\s*\n/,                    '')			
 		.replaceAll(/(?m)^\s*((#|(\/\/)).*)?\n/,  '')			
 	
-	println("rmHashAnchored=\n${rmHashAnchored}")
-	println()
+	String readyJson = splicedAndDeblanked
 	
-	// make each line into a separate element
-	// remove final comma
-	// wrap entire thing in array markers
-	
-	def lineWise = rmHashAnchored	
-		.replaceAll(/(?m)^.*$/,    '{ $0 },' )	
-		.replaceAll(/,[ \t\n]*$/,  '')			
-		.replaceAll(/^/, "[\n")									
-		.replaceAll(/$/, "\n]")
-	println("lineWise=\n${lineWise}")
-	println()
-	
-	def objLax = parseLaxJson("{${rmHashAnchored}}")
-	println("objLax=\n${objLax}")
-	println()
+	if (!asArray)
+	{
+		readyJson = readyJson.replaceAll(/^\s*[^{]/,  "{\n\$0")
+	}
+	else 
+	{
+		if (lineAsList)
+		{
+			readyJson = readyJson
+				.replaceAll(/(?m),[ \t]*$/,  '' )	
+				.replaceAll(/(?m)^.*$/,      '[ $0 ],' )	
+		}
+		
+		if (lineAsMap)
+		{
+			readyJson = readyJson
+				.replaceAll(/(?m),[ \t]*$/,  '' )	
+				.replaceAll(/(?m)^.*$/,      '{ $0 },' )	
+		}
 
-	println("objLax-as-Json=\n${new JsonBuilder(objLax).toPrettyString()}")
-	println()
+		// remove possible final comma
+		// wrap entire thing in array markers
+		
+		readyJson = readyJson	
+			.replaceAll(/,[ \t\n]*$/,  '')			
+			.replaceAll(/^/, "[\n")									
+			.replaceAll(/$/, "\n]")
+	}
 	
-	def objLW = parseLaxJson("${lineWise}")
-	println("objLW=\n${objLW}")
-	println()
-
-	println("objLW-as-Json=\n${new JsonBuilder(objLW).toPrettyString()}")
-	println()
+	say.debug (verbose, "slurpLaxJson: cleaned-up JSON (before LAX parsing):\n${readyJson};")
 	
-	println('--------------------')
+	// See discusson: hhttps://stackoverflow.com/questions/37864542/jenkins-pipeline-notserializableexception-groovy-json-internal-lazymap
+	
+	return new JsonSlurperClassic().parseText(
+		new JsonBuilder(
+			new JsonSlurper()
+				.setType(JsonParserType.LAX)
+				.parseText(readyJson)
+		)
+		.toString()
+	)
 }
 
-test333(sss)
+def test333(text, Boolean asArray, Boolean lineAsList, Boolean lineAsMap)
+{
+	println ('===333===========================')
+	try {
+		def obj = slurpLaxJson(text, verbose:true, asArray:asArray, lineAsList:lineAsList, lineAsMap:lineAsMap)
+		println ('----------')
+		println ("obj.Class=${obj.getClass()}; obj=${new JsonBuilder(obj).toPrettyString()}")
+	}
+	catch (e)
+	{
+		println e
+	}
+	println ()
+}
+
+
+test333(sss, false, false, false)
+test333(sss, false, true , false)
+test333(sss, false, false, true )
+test333(sss, false, true , true )
+
+test333(sss, true , false, false)
+test333(sss, true , true , false)
+test333(sss, true , false, true )
+test333(sss, true , true , true )
+
+test333("{MS: hello}",             true , false, false)
+test333("{MS: hello}, {MS:xform}", true , false, false)
 
 /* */
