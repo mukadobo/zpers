@@ -1,3 +1,4 @@
+<% out.print this.getClass().getDeclaredFields().toString() %>
 apiVersion: v1
 kind: Route
 
@@ -17,7 +18,17 @@ if (!HOSTNAME.isEmpty()) out.print """
     to:
         kind: Service
         name: "${SVC_NAME}"
-
+foo:<%
+if (binding.hasVariable('FOO')) out.print "  <<${binding.getVariable('FOO')}>>"
+%>
+bar:<%
+if (binding.hasVariable('BAR')) out.print "  <<$BAR>>"
+%>
+tiz:<%
+if (binding.hasVariable('TIZ')) out.print "  <<${binding.getVariable('TIZ')}>>"
+%>
+nut:
+<% out.print binding.getVariables() %>
 # EOF
 
 apiVersion: v1

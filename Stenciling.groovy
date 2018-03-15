@@ -88,6 +88,7 @@ def test33()
         SVC_NAME      : 'svc-to',
         HOSTNAME      : 'hostname',
         VOLUME_MOUNTS : volumeMounts,
+        BAR : bbb,
     ]
 
     depict(stencil, substitutions)
