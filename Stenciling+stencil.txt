@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Route
+
+# PROJECT_ID     - The parent project (namespace) for this service
+# RT_NAME        - The name of the route (within the parent project)
+# SVC_NAME       - The name of the service this route forwards to
+
+metadata:
+    namespace: "${PROJECT_ID}"
+    name: "${RT_NAME}"
+    annotations:
+        haproxy.router.openshift.io/balance: roundrobin
+spec:<%
+if (!HOSTNAME.isEmpty()) out.print """
+    host: "$HOSTNAME\""""
+%>
+    to:
+        kind: Service
+        name: "${SVC_NAME}"
+
+# EOF
+
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  ...
+spec:
+  replicas: 1
+  ...
+  template:
+    metadata:
+      ...
+    spec:
+      containers:
+        - env:
+            ...
+          ...
+          volumeMounts:<% if(! VOLUME_MOUNTS.isEmpty()) out.print "\n"+VOLUME_MOUNTS.replaceAll(/(?m)^/, "\
+            ")
+%>
+            - mountPath: /podinfo
+              name: podinfo
+            - mountPath: /nfs-show
+              name: nfs-show
+      dnsPolicy: ClusterFirst
+      ...
+      volumes:
+        - name: nfs-show
+          persistentVolumeClaim:
+            claimName: nfs-show-pvc
+        - downwardAPI:
+            defaultMode: 420
+            items:
+              - fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels
+                path: pod-labels.properties
+              - fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.annotations
+                path: pod-annotations.properties
+          metadata:
+            defaultMode: 420
+            items:
+              - fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.labels
+                name: pod-labels.properties
+              - fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.annotations
+                name: pod-annotations.properties
+          name: podinfo
+  test: false
+  ...
+status:
+  ...
