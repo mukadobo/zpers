@@ -4,22 +4,32 @@ class JsonConjoin
 {
     static Object of(Object left, Object right)
     {
-        if (left  == null) return deepCopy(right)
+        // when right is null, just return a deep copy of left
+
         if (right == null) return deepCopy(left )
 
-        if ((left in Number) && (right in Number)) return right
+        // when left if null,  return deep copy of right UNLESS right is a list of prototypes
+
+        if (left  == null)
+        {
+            Boolean rightIsProto = right in List
+
+            return rightIsProto ? null : deepCopy(right)
+        }
+
+        if ((left in Number) && (right in Number)) return left
 
         if ((left in Map ) && (right in Map )) return ofMaps (left as Map , right as Map )
         if ((left in List) && (right in List)) return ofLists(left as List, right as List)
 
-        if (right in left.getClass()) return deepCopy(right)
+        if (left in right.getClass()) return deepCopy(left)
 
         throw new IllegalArgumentException("Can't conjoin types: left is ${left.getClass()}, right is ${right.getClass()}")
     }
 
     static private Map ofMaps(Map left, Map right)
     {    
-        Map rval = [:] << left << right.collectEntries { k, v -> [k, of(left[k], right[k])] }
+        Map rval = [:] << right << left.collectEntries { k, v -> [k, of(left[k], right[k])] }
     }
 
     static private List ofLists(List left, List right)
