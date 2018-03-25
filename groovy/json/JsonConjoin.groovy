@@ -7,7 +7,20 @@ import com.mukadobo.zpers.groovy.langx.MapX
 
 class JsonConjoin
 {
+    private Object base
+
+    JsonConjoin(Object base)
+    {
+        this.base = base
+    }
+    
     static Object of(Object base, Object under)
+    {
+        new JsonConjoin(base).of(under)
+        null
+    }
+    
+    Object of(Object under)
     {
         // when under is null, just return a deep copy of base
 
