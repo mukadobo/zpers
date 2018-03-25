@@ -1,45 +1,59 @@
+package com.mukadobo.zpers.groovy.json
+
 import org.codehaus.groovy.runtime.NullObject
+
+import com.mukadobo.zpers.groovy.langx.ListX
+import com.mukadobo.zpers.groovy.langx.MapX
 
 class JsonConjoin
 {
-    static Object of(Object left, Object right)
+    static Object of(Object base, Object under)
     {
-        // when right is null, just return a deep copy of left
+        // when under is null, just return a deep copy of base
 
-        if (right == null) return deepCopy(left )
-
-        // when left if null,  return deep copy of right UNLESS right is a list of prototypes
-
-        if (left  == null)
+        if (under == null)
         {
-            Boolean rightIsProto = right in List
+            def dpcp = deepCopy(base)
 
-            return rightIsProto ? null : deepCopy(right)
+            return dpcp
         }
 
-        if ((left in Number) && (right in Number)) return left
+        // when base is null,  return deep copy of under UNLESS under is a list of prototypes
 
-        if ((left in Map ) && (right in Map )) return ofMaps (left as Map , right as Map )
-        if ((left in List) && (right in List)) return ofLists(left as List, right as List)
+        if (base  == null)
+        {
+            Boolean underIsProto = under in List
+            Object  rval         = underIsProto ? null : deepCopy(under)
 
-        if (left in right.getClass()) return deepCopy(left)
+            return rval
+        }
 
-        throw new IllegalArgumentException("Can't conjoin types: left is ${left.getClass()}, right is ${right.getClass()}")
+        if ((base in Number) && (under in Number)) return base
+
+        if ((base in Map ) && (under in Map )) return ofMaps (base as Map , under as Map )
+        if ((base in List) && (under in List)) return ofLists(base as List, under as List)
+
+        if (base in under.getClass()) return deepCopy(base)
+
+        throw new IllegalArgumentException("Can't conjoin types: base is ${base.getClass()}, under is ${under.getClass()}")
     }
 
-    static private Map ofMaps(Map left, Map right)
+    static private Map ofMaps(Map base, Map under)
     {    
-        Map rval = [:] << right << left.collectEntries { k, v -> [k, of(left[k], right[k])] }
+        Map filteredDefaults    = MapX.collectEntries (under) { k, v -> base.containsKey(k) ? null : [(k): deepCopy(v) ] }
+        Map recursiveBaseValues = MapX.collectEntries (base ) { k, v -> [(k) : of(base[k], under[k])] }
+
+        return filteredDefaults << recursiveBaseValues
     }
 
-    static private List ofLists(List left, List right)
+    static private List ofLists(List base, List under)
     {
-        if (right.isEmpty() ) return deepCopy(left)
-        if (right.size() > 1) throw new IllegalArgumentException("Can't process right-side array item with length > 1")
+        if (under.isEmpty() ) return deepCopy(base)
+        if (under.size() > 1) throw new IllegalArgumentException("Can't process under-side array item with length > 1")
 
-        Object rightItem = right[0]
+        Object underItem = under[0]
 
-        left.collect { it -> JsonConjoin.of(it, rightItem) }
+        ListX.collect(base) { it -> [JsonConjoin.of(it, underItem)] }
     }
 
     static private Object deepCopy(Object item)
@@ -64,11 +78,13 @@ class JsonConjoin
 
             case Map:
 
-                return item.collectEntries { key, value -> [key, deepCopy(value)] }
+                Map rval = MapX.collectEntries(item)  { k, v ->  [(k) : deepCopy(v)] }
+                return rval
 
             case List:
 
-                return item.collect { it -> deepCopy(it) }
+                List rval = ListX.collect(item) { it -> [deepCopy(it)] }
+                return rval
 
             default:
 
