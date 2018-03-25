@@ -14,59 +14,63 @@ class JsonConjoin
         this.base = base
     }
     
-    static Object of(Object base, Object under)
+    static Object of(Object base, Object exempli)
     {
-        new JsonConjoin(base).of(under)
-        null
+        new JsonConjoin(base).apply(exempli)
     }
     
-    Object of(Object under)
+    Object apply(Object exempli)
     {
-        // when under is null, just return a deep copy of base
+        // when exempli is null, just return a deep copy of base
 
-        if (under == null)
+        if (exempli == null)
         {
             def dpcp = deepCopy(base)
 
             return dpcp
         }
 
-        // when base is null,  return deep copy of under UNLESS under is a list of prototypes
+        // when base is null,  return deep copy of exempli UNLESS exempli is a list of prototypes
 
         if (base  == null)
         {
-            Boolean underIsProto = under in List
-            Object  rval         = underIsProto ? null : deepCopy(under)
+            Boolean underIsProto = exempli in List
+            Object  rval         = underIsProto ? null : deepCopy(exempli)
 
             return rval
         }
 
-        if ((base in Number) && (under in Number)) return base
+        if ((base in Number) && (exempli in Number)) return base
 
-        if ((base in Map ) && (under in Map )) return ofMaps (base as Map , under as Map )
-        if ((base in List) && (under in List)) return ofLists(base as List, under as List)
+        if ((base in Map ) && (exempli in Map )) return applyMap (exempli)
+        if ((base in List) && (exempli in List)) return applyList(exempli)
 
-        if (base in under.getClass()) return deepCopy(base)
+        if (base in exempli.getClass()) return deepCopy(base)
 
-        throw new IllegalArgumentException("Can't conjoin types: base is ${base.getClass()}, under is ${under.getClass()}")
+        throw new IllegalArgumentException("Can't conjoin types: base is ${base.getClass()}, exempli is ${exempli.getClass()}")
     }
 
-    static private Map ofMaps(Map base, Map under)
+    private Object recurse(Object subBase, Object subExempli)
+    {
+        of(subBase, subExempli)
+    }
+
+    private Map applyMap(Map exempli)
     {    
-        Map filteredDefaults    = MapX.collectEntries (under) { k, v -> base.containsKey(k) ? null : [(k): deepCopy(v) ] }
-        Map recursiveBaseValues = MapX.collectEntries (base ) { k, v -> [(k) : of(base[k], under[k])] }
+        Map filteredDefaults    = MapX.collectEntries (exempli) { k, v -> base.containsKey(k) ? null : [(k): deepCopy(v) ] }
+        Map recursiveBaseValues = MapX.collectEntries (base   ) { k, v -> [(k) : recurse(base[k], exempli[k])] }
 
         return filteredDefaults << recursiveBaseValues
     }
 
-    static private List ofLists(List base, List under)
+    private List applyList(List exempli)
     {
-        if (under.isEmpty() ) return deepCopy(base)
-        if (under.size() > 1) throw new IllegalArgumentException("Can't process under-side array item with length > 1")
+        if (exempli.isEmpty() ) return deepCopy(base)
+        if (exempli.size() > 1) throw new IllegalArgumentException("Can't process exempli-side array item with length > 1")
 
-        Object underItem = under[0]
+        Object underItem = exempli[0]
 
-        ListX.collect(base) { it -> [JsonConjoin.of(it, underItem)] }
+        ListX.collect(base) { it -> [recurse(it, underItem)] }
     }
 
     static private Object deepCopy(Object item)
