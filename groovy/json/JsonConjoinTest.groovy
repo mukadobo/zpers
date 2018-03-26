@@ -231,5 +231,44 @@ lrcBBLists.each
 }
 println()
 
+//     ['asK2L2   ', 'asJ2L1   ', [jj:'J2', kk:'K2', ll:'L2'] ],
+
+def base    = aaMaps['asK2L2']
+def exempli = aaMaps['asJ2L1']
+def expect  = [jj:'J2', kk:'K2', ll:'L2']
+
+base    = [ 'itemsq' : [50         ] ]
+exempli = [ 
+    'items' : JsonConjoin.exempli(
+        'prepend' : [20,21], 
+        'append': [30,31,32], 
+        'ifEmtpy': [90,91], 
+        'apply': [
+            [xx:'X1',yy:'Y1'],
+            [xx:'X2',zz:'Z2']
+        ]
+    )
+]
+expect  = [ 'items' : [10,11,12,50] ]
+
+
+def Object doit(base, exempli) 
+{
+    println()
+    println("base=$base")
+    println("exempli=$exempli")
+
+    def rval = JsonConjoin.basedOn(base).apply(exempli)
+    println("rval=$rval")
+
+    rval
+}
+
+assert doit(base, exempli) == expect
+
+// $pre  [<]   [pre]    items<
+// $app  [>]   [app]    items>
+// $if0  [*]   [if0]    items*
+// $exm  [=]   [exm]    items~
 
 /**/

@@ -1,17 +1,24 @@
 package com.mukadobo.zpers.groovy.json
 
+import groovy.json.JsonBuilder
+
 import org.codehaus.groovy.runtime.NullObject
 
 import com.mukadobo.zpers.groovy.langx.ListX
 import com.mukadobo.zpers.groovy.langx.MapX
 
-class JsonConjoin
+class JsonConjoin implements Serializable
 {
     private Object base
 
     JsonConjoin(Object base)
     {
         this.base = base
+    }
+
+    static JsonConjoin basedOn(Object base)
+    {
+        new JsonConjoin(base)
     }
     
     static Object of(Object base, Object exempli)
@@ -30,7 +37,7 @@ class JsonConjoin
             return dpcp
         }
 
-        // when base is null,  return deep copy of exempli UNLESS exempli is a list of prototypes
+        // when base is null, return deep copy of exempli UNLESS exempli is a list of prototypes
 
         if (base  == null)
         {
@@ -107,6 +114,37 @@ class JsonConjoin
 
                 throw new IllegalArgumentException("Don't know how to handle class: ${item.getClass()}")
             
+        }
+    }
+
+    String toString()
+    {
+        "base=$base"
+    }
+
+    static Exempli exempli(Map args)
+    {
+        new Exempli(args)
+    }
+
+    static class Exempli implements Serializable
+    {
+        final List prepend
+        final List append
+        final List ifNothing
+        final List subExempli
+
+        Exempli(Map args = [:])
+        {
+            this.prepend    = args.prepend    ? args.prepend    : []
+            this.append     = args.append     ? args.append     : []
+            this.ifNothing  = args.ifNothing  ? args.ifNothing  : []
+            this.subExempli = args.subExempli ? args.subExempli : []
+        }
+
+        String toString()
+        {
+            new JsonBuilder(this).toPrettyString()
         }
     }
 }
