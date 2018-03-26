@@ -189,7 +189,7 @@ class JsonConjoin implements Serializable
             {
                 rval = ListX.collect(rval)
                 { r -> 
-                    apply.inject(r) { v, x -> [JsonConjoin.of(v, x)] }
+                    [ apply.inject(r) { v, x -> JsonConjoin.of(v, x) } ]
                 }
             }
 

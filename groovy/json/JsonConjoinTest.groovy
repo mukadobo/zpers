@@ -317,31 +317,6 @@ def Map ccBase = [
     ],
 ]
 
-def expect  = [ 
-    'extant' : [
-        [aa:'A1',          cc:'C2',     jj:'J2',          ll:'L2',     rr:'R2',          tt:'T2'], 
-        [aa:'A2', bb:'B1', cc:'C2',     jj:'J2',          ll:'L2',     rr:'R2',          tt:'T2'], 
-
-        [aa:'A2',          cc:'C2',     jj:'J0',          ll:'L2',     rr:'R2',          tt:'T2'], 
-        [aa:'A2',          cc:'C2',     jj:'J2', kk:'K0', ll:'L2',     rr:'R2',          tt:'T2'], 
-
-        [aa:'A2',          cc:'C2',     jj:'J2',          ll:'L2',     rr:'R1',          tt:'T2'], 
-        [aa:'A2',          cc:'C2',     jj:'J2',          ll:'L2',     rr:'R2', ss:'S1', tt:'T2'], 
-
-        [aa:'A0', bb:'B0', cc:'C0',     jj:'J0', kk:'K0', ll:'L0',     rr:'R0', ss:'S0', tt:'T0',   xx:'X0' ],
-    ],
-    'nosuch' : [
-        [aa:'A1',          cc:'C2',     jj:'J2',          ll:'L2',     rr:'R2',          tt:'T2'], 
-        [aa:'A2', bb:'B1', cc:'C2',     jj:'J2',          ll:'L2',     rr:'R2',          tt:'T2'], 
-
-        [aa:'A2',          cc:'C2',     jj:'J1',          ll:'L2',     rr:'R2',          tt:'T2'], 
-        [aa:'A2',          cc:'C2',     jj:'J2', kk:'K1', ll:'L2',     rr:'R2',          tt:'T2'], 
-
-        [aa:'A2',          cc:'C2',     jj:'J2',          ll:'L2',     rr:'R1',          tt:'T2'], 
-        [aa:'A2',          cc:'C2',     jj:'J2',          ll:'L2',     rr:'R2', ss:'S1', tt:'T2'], 
-    ]
-]
-
 List lrcCCExempli = [
     ['simple', ('extant_'+'Peas'), [
         'extant': [
@@ -478,6 +453,77 @@ List lrcCCExempli = [
     ]],
     ['others', ('nosuch_'+'peaS'), [
         'nosuch': [ ],
+        'others': [
+            [yy:'Y0', ], 
+        ],
+    ]],
+    //------------------------------------------
+    //   'PEAS' : JsonConjoin.exempli(
+    //       'prepend' : [[aa:'A1'], [bb:'B1']], 
+    //       'ifEmpty' : [[jj:'J1'], [kk:'K1']], 
+    //       'append'  : [[rr:'R1'], [ss:'S1']], 
+    //       'apply'   : [
+    //           [aa:'A2', cc:'C2'],
+    //           [jj:'J2', ll:'L2'],
+    //           [rr:'R2', tt:'T2'],
+    //       ]
+    //   ),
+
+    ['simple', ('extant_'+'PEAS'), [
+        'extant': [
+            [aa:'A1',          cc:'C2', jj:'J2',          ll:'L2', rr:'R2',          tt:'T2', ], 
+            [aa:'A2', bb:'B1', cc:'C2', jj:'J2',          ll:'L2', rr:'R2',          tt:'T2', ], 
+
+            [aa:'A2',          cc:'C2', jj:'J0',          ll:'L2', rr:'R2',          tt:'T2', ], 
+            [aa:'A2',          cc:'C2', jj:'J2', kk:'K0', ll:'L2', rr:'R2',          tt:'T2', ], 
+
+            [aa:'A2',          cc:'C2', jj:'J2',          ll:'L2', rr:'R1',          tt:'T2', ], 
+            [aa:'A2',          cc:'C2', jj:'J2',          ll:'L2', rr:'R2', ss:'S1', tt:'T2', ],
+        ]
+    ]],
+    ['simple', ('nosuch_'+'PEAS'), [
+        'nosuch': [
+            [aa:'A1',          cc:'C2', jj:'J2',          ll:'L2', rr:'R2',          tt:'T2', ], 
+            [aa:'A2', bb:'B1', cc:'C2', jj:'J2',          ll:'L2', rr:'R2',          tt:'T2', ], 
+
+            [aa:'A2',          cc:'C2', jj:'J1',          ll:'L2', rr:'R2',          tt:'T2', ], 
+            [aa:'A2',          cc:'C2', jj:'J2', kk:'K1', ll:'L2', rr:'R2',          tt:'T2', ], 
+
+            [aa:'A2',          cc:'C2', jj:'J2',          ll:'L2', rr:'R1',          tt:'T2', ], 
+            [aa:'A2',          cc:'C2', jj:'J2',          ll:'L2', rr:'R2', ss:'S1', tt:'T2', ],
+        ], 
+        'extant': [
+            [jj:'J0', ], 
+            [kk:'K0', ], 
+        ],
+    ]],
+    ['others', ('nosuch_'+'PEAS'), [
+        'nosuch': [
+            [aa:'A1',          cc:'C2', jj:'J2',          ll:'L2', rr:'R2',          tt:'T2', ], 
+            [aa:'A2', bb:'B1', cc:'C2', jj:'J2',          ll:'L2', rr:'R2',          tt:'T2', ], 
+
+            [aa:'A2',          cc:'C2', jj:'J1',          ll:'L2', rr:'R2',          tt:'T2', ], 
+            [aa:'A2',          cc:'C2', jj:'J2', kk:'K1', ll:'L2', rr:'R2',          tt:'T2', ], 
+
+            [aa:'A2',          cc:'C2', jj:'J2',          ll:'L2', rr:'R1',          tt:'T2', ], 
+            [aa:'A2',          cc:'C2', jj:'J2',          ll:'L2', rr:'R2', ss:'S1', tt:'T2', ],
+        ], 
+        'others': [
+            [yy:'Y0', ], 
+        ],
+    ]],
+    ['monty', ('extant_'+'PEAS'), [
+        'extant': [
+            [aa:'A1',          cc:'C2', jj:'J2',          ll:'L2', rr:'R2',          tt:'T2', ], 
+            [aa:'A2', bb:'B1', cc:'C2', jj:'J2',          ll:'L2', rr:'R2',          tt:'T2', ], 
+
+            [aa:'A2',          cc:'C2', jj:'J0',          ll:'L2', rr:'R2',          tt:'T2', ], 
+            [aa:'A2',          cc:'C2', jj:'J2', kk:'K0', ll:'L2', rr:'R2',          tt:'T2', ], 
+            [aa:'A0', bb:'B0', cc:'C0', jj:'J0', kk:'K0', ll:'L0', rr:'R0', ss:'S0', tt:'T0', xx:'X0', ],
+
+            [aa:'A2',          cc:'C2', jj:'J2',          ll:'L2', rr:'R1',          tt:'T2', ], 
+            [aa:'A2',          cc:'C2', jj:'J2',          ll:'L2', rr:'R2', ss:'S1', tt:'T2', ],
+        ], 
         'others': [
             [yy:'Y0', ], 
         ],
